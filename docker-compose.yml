@@ -66,7 +66,7 @@ services:
       api:
         condition: service_healthy
     restart: unless-stopped
-    command: python mcp_server/server.py
+    command: python -m mcp_server.server
 
   # -- Telegram Bot: Daily digest delivery --
   telegram_bot:

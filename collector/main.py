@@ -211,12 +211,18 @@ def main():
         return
 
     # Daemon mode — APScheduler
+    asyncio.run(_run_daemon(db))
+
+
+async def _run_daemon(db):
+    """Run the collector scheduler inside a proper asyncio event loop."""
     scheduler = CollectionScheduler(db=db, collect_fn=lambda: run_once(db))
     scheduler.start()
     log.info("Collector running. Ctrl+C to stop.")
 
     try:
-        asyncio.get_event_loop().run_forever()
+        while True:
+            await asyncio.sleep(3600)
     except (KeyboardInterrupt, SystemExit):
         scheduler.stop()
         log.info("Collector stopped.")
