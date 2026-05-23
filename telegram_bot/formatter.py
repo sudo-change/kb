@@ -7,24 +7,35 @@ from datetime import date, datetime, timezone
 from typing import Any
 
 
+# Use lowercase category IDs matching DB/classifier (categories.yaml)
 CATEGORIES = [
-    "BugBounty",
-    "AI-Money",
-    "SaaS-Niches",
-    "Crypto-DeFi-Alpha",
-    "Attacking-AI",
-    "Tools-Drops",
-    "General",
+    "bugbounty",
+    "ai-money",
+    "saas-niches",
+    "crypto-defi",
+    "attacking-ai",
+    "tools-drops",
+    "general",
 ]
 
+CATEGORY_LABELS = {
+    "bugbounty":    "BugBounty",
+    "ai-money":     "AI-Money",
+    "saas-niches":  "SaaS-Niches",
+    "crypto-defi":  "Crypto/DeFi-Alpha",
+    "attacking-ai": "Attacking-AI",
+    "tools-drops":  "Tools-Drops",
+    "general":      "General",
+}
+
 CATEGORY_EMOJI = {
-    "BugBounty":        "🐛",
-    "AI-Money":         "💰",
-    "SaaS-Niches":      "📦",
-    "Crypto-DeFi-Alpha":"🔐",
-    "Attacking-AI":     "🤖",
-    "Tools-Drops":      "🛠",
-    "General":          "📰",
+    "bugbounty":    "🐛",
+    "ai-money":     "💰",
+    "saas-niches":  "📦",
+    "crypto-defi":  "🔐",
+    "attacking-ai": "🤖",
+    "tools-drops":  "🛠",
+    "general":      "📰",
 }
 
 _ESCAPE_RE = re.compile(r"([_*\[\]()~`>#+\-=|{}.!\\])")
@@ -49,8 +60,9 @@ def format_item(item: dict[str, Any]) -> str:
 def format_digest(category: str, items: list[dict[str, Any]], run_date: date | None = None) -> str:
     """Build full digest message for one category topic."""
     day = (run_date or date.today()).strftime("%Y-%m-%d")
+    label = CATEGORY_LABELS.get(category, category)
     emoji = CATEGORY_EMOJI.get(category, "📌")
-    header = escape(f"{emoji} {category} — {day}")
+    header = escape(f"{emoji} {label} — {day}")
     lines = [f"*{header}*", ""]
     for item in items:
         lines.append(format_item(item))
