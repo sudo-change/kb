@@ -1,7 +1,7 @@
 nul
 # Secrets
 Cookie.txt
-cookies/
+cookies/*.txt
 .env
 
 # Data
