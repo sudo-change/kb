@@ -1,6 +1,17 @@
+---
+name: yt-extract
+description: Extract transcript, description, and top 3 comments from YouTube videos using yt-dlp. Outputs clean markdown named by video title. Supports private videos via cookies. Use when user says "extract youtube", "get transcript", "yt extract", pastes a YouTube URL, or wants to ingest video content.
+---
+
 # yt-extract
 
 Extract transcript, description, and top comments from YouTube videos using yt-dlp.
+
+## On invocation
+
+1. Run `python scripts/yt_extract.py <url> --cookies cookies/cookies.txt`
+2. Verify output file exists in `data/yt_extracts/`
+3. Report: title, channel, duration, transcript length
 
 ## When to use
 
