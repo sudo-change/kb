@@ -15,9 +15,22 @@ import httpx
 API_BASE_DEFAULT = "http://localhost:8000"
 
 CATEGORIES = [
-    "BugBounty", "AI-Money", "SaaS-Niches",
-    "Crypto-DeFi-Alpha", "Attacking-AI", "Tools-Drops", "General",
+    "bugbounty", "ai-money", "saas-niches",
+    "crypto-defi", "attacking-ai", "tools-drops", "general",
 ]
+
+CATEGORY_LABELS = {
+    "bugbounty":    "BugBounty",
+    "ai-money":     "AI-Money",
+    "saas-niches":  "SaaS-Niches",
+    "crypto-defi":  "Crypto/DeFi-Alpha",
+    "attacking-ai": "Attacking-AI",
+    "tools-drops":  "Tools-Drops",
+    "general":      "General",
+}
+
+_DISPLAY_TO_ID = {v.lower(): k for k, v in CATEGORY_LABELS.items()}
+_DISPLAY_TO_ID.update({k: k for k in CATEGORIES})
 
 _RANGE_UNITS: dict[str, int] = {"h": 3600, "d": 86400, "w": 604800}
 
@@ -60,16 +73,17 @@ def tool_get_items(
     if since:
         params["since"] = since
     if category:
-        if category not in CATEGORIES:
+        cat_id = _DISPLAY_TO_ID.get(category.lower(), category.lower())
+        if cat_id not in CATEGORIES:
             raise ValueError(f"Invalid category '{category}'. Valid: {CATEGORIES}")
-        params["category"] = category
+        params["category"] = cat_id
     if q:
         params["q"] = q
     return api_get("/items", params, api_base)  # type: ignore[return-value]
 
 
 def tool_get_categories() -> list[str]:
-    return CATEGORIES
+    return list(CATEGORY_LABELS.values())
 
 
 def tool_classify_item(
@@ -77,9 +91,10 @@ def tool_classify_item(
     category: str,
     api_base: str = API_BASE_DEFAULT,
 ) -> dict:
-    if category not in CATEGORIES:
+    cat_id = _DISPLAY_TO_ID.get(category.lower(), category.lower())
+    if cat_id not in CATEGORIES:
         raise ValueError(f"Invalid category '{category}'. Valid: {CATEGORIES}")
-    return api_patch(f"/items/{item_id}", {"category": category}, api_base)  # type: ignore[return-value]
+    return api_patch(f"/items/{item_id}", {"category": cat_id}, api_base)  # type: ignore[return-value]
 
 
 def tool_get_youtube_transcript(url: str) -> str:
@@ -117,11 +132,12 @@ def tool_get_daily_digest(api_base: str = API_BASE_DEFAULT) -> dict[str, list[di
 
     items: list[dict] = api_get("/items", {"since": today, "limit": 500}, api_base)  # type: ignore[assignment]
 
-    digest: dict[str, list[dict]] = {cat: [] for cat in CATEGORIES}
+    digest: dict[str, list[dict]] = {CATEGORY_LABELS.get(c, c): [] for c in CATEGORIES}
     digest["Uncategorized"] = []
 
     for item in items:
-        cat = item.get("category") or "Uncategorized"
-        digest.setdefault(cat, []).append(item)
+        raw = item.get("category")
+        label = CATEGORY_LABELS.get(raw, raw) if raw else "Uncategorized"
+        digest.setdefault(label, []).append(item)
 
     return {cat: rows for cat, rows in digest.items() if rows}
