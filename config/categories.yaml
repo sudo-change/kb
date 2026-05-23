@@ -1,35 +1,99 @@
+# Category keyword rules.
+# Matcher semantics: keyword matches as a WHOLE WORD (case-insensitive)
+# against title + summary + tags. Use multi-word phrases for precision.
+# Order matters: first matching category wins (general is fallback).
+
 categories:
   - id: bugbounty
     name: "BugBounty"
     description: "Vulnerabilities, techniques, CTFs, writeups, bug bounty programs"
-    keywords: ["bug bounty", "vulnerability", "exploit", "ctf", "xss", "ssrf", "idor", "rce", "sqli", "pentest", "writeup", "hackerone", "bugcrowd"]
-
-  - id: ai-money
-    name: "AI-Money"
-    description: "Dev-related money making with AI, automation income, money glitches"
-    keywords: ["make money", "income", "revenue", "side project", "freelance", "automation", "passive income", "ai tool", "monetize"]
-
-  - id: saas-niches
-    name: "SaaS-Niches"
-    description: "SaaS ideas, market gaps, niche opportunities to provide value"
-    keywords: ["saas", "micro-saas", "niche", "market gap", "indie hacker", "arr", "mrr", "bootstrapped", "startup idea"]
-
-  - id: crypto-defi
-    name: "Crypto/DeFi-Alpha"
-    description: "DeFi exploits, MEV, yield opportunities, smart contract bugs"
-    keywords: ["defi", "mev", "yield", "smart contract", "solidity", "exploit", "flash loan", "arbitrage", "airdrop", "token"]
+    keywords:
+      - "bug bounty"
+      - "vulnerability"
+      - "exploit"
+      - "ctf"
+      - "xss"
+      - "ssrf"
+      - "idor"
+      - "rce"
+      - "sqli"
+      - "sql injection"
+      - "pentest"
+      - "penetration test"
+      - "writeup"
+      - "hackerone"
+      - "bugcrowd"
+      - "cve"
+      - "0day"
 
   - id: attacking-ai
     name: "Attacking-AI"
     description: "Adversarial ML, LLM jailbreaks, AI security research"
-    keywords: ["jailbreak", "prompt injection", "adversarial", "llm security", "ai safety", "red team", "model extraction"]
+    # Listed BEFORE ai-money so LLM-security beats generic AI-money matches
+    keywords:
+      - "prompt injection"
+      - "jailbreak"
+      - "adversarial"
+      - "llm security"
+      - "ai safety"
+      - "model extraction"
+      - "ai red team"
+      - "indirect prompt"
+
+  - id: crypto-defi
+    name: "Crypto/DeFi-Alpha"
+    description: "DeFi exploits, MEV, yield opportunities, smart contract bugs"
+    keywords:
+      - "defi"
+      - "mev"
+      - "yield farming"
+      - "smart contract"
+      - "solidity"
+      - "flash loan"
+      - "arbitrage"
+      - "airdrop"
+      - "rugpull"
+      - "rekt"
+
+  - id: ai-money
+    name: "AI-Money"
+    description: "Dev-related money making with AI, automation income, money glitches"
+    keywords:
+      - "side project"
+      - "passive income"
+      - "ai tool"
+      - "ai agent"
+      - "automation income"
+      - "monetize ai"
+      - "ai startup"
+      - "ai workflow"
+
+  - id: saas-niches
+    name: "SaaS-Niches"
+    description: "SaaS ideas, market gaps, niche opportunities to provide value"
+    keywords:
+      - "micro-saas"
+      - "indie hacker"
+      - "bootstrapped"
+      - "startup idea"
+      - "market gap"
+      - "arr"
+      - "mrr"
+      - "saas idea"
 
   - id: tools-drops
     name: "Tools-Drops"
     description: "New tools, trending repos, developer tooling releases"
-    keywords: ["new tool", "release", "open source", "trending", "framework", "library", "cli tool", "developer tool"]
+    keywords:
+      - "show hn"
+      - "open source"
+      - "github trending"
+      - "new release"
+      - "cli tool"
+      - "developer tool"
+      - "launched"
 
   - id: general
     name: "General"
     description: "High-signal items that don't fit other categories"
-    keywords: []
+    keywords: []  # Fallback — matches when no other category claims the item

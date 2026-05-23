@@ -11,10 +11,12 @@ services:
       - CACHE_EXPIRE=300
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:1200/healthz"]
+      # RSSHub image is node-based; use node's built-in http to avoid relying on wget/curl
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:1200/healthz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 30s
 
   # -- Collector: Fetches from RSSHub + yt-dlp, stores in SQLite --
   # collector:

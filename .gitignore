@@ -1,22 +1,48 @@
 nul
+
 # Secrets
 Cookie.txt
 cookies/*.txt
 cookies/*.json
 *.session
 .env
+.env.local
+.env.*.local
 
-# Data
-data/*.db
-data/*.sqlite
+# Data (recursive)
+**/*.db
+**/*.db-journal
+**/*.db-wal
+**/*.sqlite
+**/*.sqlite3
 data/yt_extracts/
+data/chroma/
+data/graph*
+
+# Allow tracking placeholder files
+!**/.gitkeep
 
 # Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .venv/
 venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Node
+node_modules/
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp

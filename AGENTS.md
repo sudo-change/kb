@@ -13,8 +13,9 @@ docker-compose up -d
 ## Verification
 
 - YT extraction: Check output .md file has Title, Channel, Duration, Transcript sections
-- Collectors: `python run.py stats` shows item counts per source
-- API: `curl http://localhost:8000/api/health`
+- Dependencies: `python scripts/yt_extract.py --help` (validates yt-dlp + node on PATH)
+- RSSHub: `curl http://localhost:1200/healthz` returns 200
+- API (Phase 3+): `curl http://localhost:8000/health`
 
 ## Conventions
 

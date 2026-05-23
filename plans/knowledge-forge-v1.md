@@ -156,6 +156,32 @@ CREATE INDEX idx_items_source ON items(source_id);
 CREATE INDEX idx_items_collected ON items(collected_at DESC);
 CREATE INDEX idx_items_url ON items(url);
 
+-- FTS5 virtual table for full-text search across title + body + summary + tags
+CREATE VIRTUAL TABLE items_fts USING fts5(
+    title, body, summary, tags,
+    content='items',
+    content_rowid='id',
+    tokenize='porter unicode61'
+);
+
+-- Triggers to keep FTS5 in sync with items table
+CREATE TRIGGER items_ai AFTER INSERT ON items BEGIN
+    INSERT INTO items_fts(rowid, title, body, summary, tags)
+    VALUES (new.id, new.title, new.body, new.summary, new.tags);
+END;
+
+CREATE TRIGGER items_ad AFTER DELETE ON items BEGIN
+    INSERT INTO items_fts(items_fts, rowid, title, body, summary, tags)
+    VALUES ('delete', old.id, old.title, old.body, old.summary, old.tags);
+END;
+
+CREATE TRIGGER items_au AFTER UPDATE ON items BEGIN
+    INSERT INTO items_fts(items_fts, rowid, title, body, summary, tags)
+    VALUES ('delete', old.id, old.title, old.body, old.summary, old.tags);
+    INSERT INTO items_fts(rowid, title, body, summary, tags)
+    VALUES (new.id, new.title, new.body, new.summary, new.tags);
+END;
+
 CREATE TABLE sources (
     id          TEXT PRIMARY KEY,
     name        TEXT NOT NULL,

@@ -50,18 +50,20 @@ rsshub:
 youtube:
   interval_minutes: 360
   cookies_path: "cookies/cookies.txt"
+  # Use handles WITHOUT '@' prefix — RSSHub/yt-dlp normalize either form,
+  # but consistent input avoids subtle routing bugs across collectors.
   channels:
-    - id: "@LiveOverflow"
+    - handle: "LiveOverflow"
       category: bugbounty
-    - id: "@JohnHammond"
+    - handle: "JohnHammond"
       category: bugbounty
-    - id: "@IppSec"
+    - handle: "IppSec"
       category: bugbounty
-    - id: "@NetworkChuck"
+    - handle: "NetworkChuck"
       category: general
-    - id: "@ThePrimeagen"
+    - handle: "ThePrimeagen"
       category: tools-drops
-    - id: "@firaborealysis"  # Critical Thinking Bug Bounty Podcast
+    - handle: "CriticalThinkingBugBountyPodcast"
       category: bugbounty
 
 rss:
