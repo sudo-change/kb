@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "knowledgeforge": {
+      "command": "python",
+      "args": ["D:\\KnowledgeBase_Final\\mcp_server\\server.py"],
+      "env": {}
+    }
+  }
+}
