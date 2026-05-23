@@ -75,12 +75,14 @@ def get_youtube_transcript(url: str) -> str:
 
 
 @mcp.tool()
-def get_daily_digest() -> dict[str, list[dict]]:
-    """Return today's items grouped by category.
+def get_daily_digest(per_category: int = 15) -> dict[str, dict]:
+    """Return today's items grouped by category (compact).
 
-    Fetches items collected since midnight UTC. Empty categories omitted.
+    Each category contains a 'count' (total items) and 'items' (up to
+    per_category entries with id/title/url/source_type/published_at).
+    Use get_items with a category filter to fetch full details.
     """
-    return tool_get_daily_digest(api_base=_API_BASE)
+    return tool_get_daily_digest(per_category=per_category, api_base=_API_BASE)
 
 
 if __name__ == "__main__":
