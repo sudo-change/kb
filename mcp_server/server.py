@@ -6,6 +6,15 @@ Tools registered here; implementations in tools.py.
 from __future__ import annotations
 
 import os
+import sys
+from pathlib import Path
+
+# Allow running as `python mcp_server/server.py` (direct) in addition to
+# `python -m mcp_server.server`.  When executed directly, the repo root
+# is not on sys.path, so the `mcp_server` package import fails.
+_REPO_ROOT = str(Path(__file__).resolve().parent.parent)
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
 
 from mcp.server.fastmcp import FastMCP
 
