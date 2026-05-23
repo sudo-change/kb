@@ -223,7 +223,7 @@ async def _run_daemon(db):
     try:
         while True:
             await asyncio.sleep(3600)
-    except (KeyboardInterrupt, SystemExit):
+    except (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
         scheduler.stop()
         log.info("Collector stopped.")
 
