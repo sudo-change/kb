@@ -13,6 +13,7 @@ from pathlib import Path
 # Ensure repo root is on path when run as: python collector/main.py
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from core.classifier import classify_item
 from core.config import load_sources
 from core.database import DB
 from core.models import Item
@@ -57,6 +58,17 @@ def _build_rss_items(sources_cfg: dict) -> list[dict]:
     return feeds
 
 
+def _auto_classify(items: list[Item]) -> list[Item]:
+    """Apply keyword-based classification to items missing a category."""
+    for item in items:
+        if item.category:
+            continue
+        detected = classify_item(item)
+        if detected:
+            item.category = detected
+    return items
+
+
 def run_once(db: DB) -> int:
     """Run all collectors once. Returns total items added."""
     sources_cfg = load_sources()
@@ -71,7 +83,7 @@ def run_once(db: DB) -> int:
             from collectors.rss import RSSCollector
             collector = RSSCollector(feeds=feeds)
             if collector.validate_config():
-                items = collector.collect()
+                items = _auto_classify(collector.collect())
                 added = db.store_items(items)
                 total_added += added
                 log.info("[rss] stored %d/%d items", added, len(items))
@@ -81,6 +93,56 @@ def run_once(db: DB) -> int:
             msg = f"rss: {e}"
             log.error(msg)
             errors.append(msg)
+
+    # HackerNews (Algolia API)
+    try:
+        from collectors.hackernews import HackerNewsCollector
+        collector = HackerNewsCollector(category="general")
+        if collector.validate_config():
+            items = _auto_classify(collector.collect())
+            added = db.store_items(items)
+            total_added += added
+            log.info("[hackernews] stored %d/%d items", added, len(items))
+    except Exception as e:
+        msg = f"hackernews: {e}"
+        log.error(msg)
+        errors.append(msg)
+
+    # Reddit (public JSON API)
+    try:
+        from collectors.reddit import RedditCollector
+        collector = RedditCollector(
+            subreddits=["netsec", "bugbounty", "MachineLearning",
+                        "LocalLLaMA", "SideProject", "SaaS", "defi"],
+            category=None,
+        )
+        if collector.validate_config():
+            items = _auto_classify(collector.collect())
+            added = db.store_items(items)
+            total_added += added
+            log.info("[reddit] stored %d/%d items", added, len(items))
+    except Exception as e:
+        msg = f"reddit: {e}"
+        log.error(msg)
+        errors.append(msg)
+
+    # GitHub trending
+    try:
+        from collectors.github import GitHubCollector
+        token = os.environ.get("GITHUB_TOKEN", "")
+        collector = GitHubCollector(
+            token=token,
+            category=None,
+        )
+        if collector.validate_config():
+            items = _auto_classify(collector.collect())
+            added = db.store_items(items)
+            total_added += added
+            log.info("[github] stored %d/%d items", added, len(items))
+    except Exception as e:
+        msg = f"github: {e}"
+        log.error(msg)
+        errors.append(msg)
 
     # YouTube channels
     yt_cfg = sources_cfg.get("youtube", {})
@@ -96,7 +158,7 @@ def run_once(db: DB) -> int:
                     source_id=f"yt-{handle.lower()}",
                     category=category,
                 )
-                items = collector.collect()
+                items = _auto_classify(collector.collect())
                 added = db.store_items(items)
                 total_added += added
                 log.info("[youtube] %s: stored %d/%d items", handle, added, len(items))
