@@ -206,6 +206,7 @@ function Sidebar({ view, setView, activeQuest, setActiveQuest, activeSource, set
     if (activeQuest === id) setActiveQuest(null);
   };
   const removeSource = (id) => {
+    if (window.KF_API) window.KF_API.deleteSource(id).catch(console.error);
     setSources(sources.filter(s => s.id !== id));
     if (activeSource === id) setActiveSource(null);
   };
@@ -322,7 +323,18 @@ function Sidebar({ view, setView, activeQuest, setActiveQuest, activeSource, set
         ))}
         {adding === "source" && (
           <AddSourceForm
-            onAdd={(s) => { setSources([...sources, s]); setAdding(null); }}
+            onAdd={(s) => {
+              if (window.KF_API) {
+                window.KF_API.addSource({
+                  id: s.id, name: s.name,
+                  type: s.rsshub ? "rsshub" : "rss",
+                  config: { url: s.url }, glyph: s.glyph,
+                  category: null, enabled: true,
+                }).catch(console.error);
+              }
+              setSources([...sources, s]);
+              setAdding(null);
+            }}
             onCancel={() => setAdding(null)}
           />
         )}
@@ -566,7 +578,7 @@ const TIMEFRAMES = [
   { id: "1w",    label: "Week",   maxH: 168 },
 ];
 
-function Feed({ items, selected, focusedIdx, onSelect, reaction, setReaction, notInterested, onNotInterested, seen, showSeen, setShowSeen, loaded, loading, onLoadMore, stats, timeframe, setTimeframe, qualityFilter }) {
+function Feed({ items, sources, selected, focusedIdx, onSelect, reaction, setReaction, notInterested, onNotInterested, seen, showSeen, setShowSeen, loaded, loading, onLoadMore, stats, timeframe, setTimeframe, qualityFilter }) {
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -585,7 +597,7 @@ function Feed({ items, selected, focusedIdx, onSelect, reaction, setReaction, no
   const timeFiltered = tf?.maxH ? items.filter(it => parseHours(it.time) <= tf.maxH) : items;
   const qualFiltered = qualityFilter ? timeFiltered.filter(it => !isLowQuality(it.title)) : timeFiltered;
   const visible = qualFiltered.slice(0, loaded);
-  const sourceMap = Object.fromEntries(window.SOURCES.map(s => [s.id, s]));
+  const sourceMap = Object.fromEntries((sources || []).map(s => [s.id, s]));
   const seenCount = [...seen].filter(id => qualFiltered.find(it => it.id === id)).length;
   const lovedCount = Object.values(reaction).filter(v => v === "love").length;
 
@@ -806,12 +818,12 @@ function App() {
   const [activeQuest, setActiveQuest] = useState(null);
   const [activeSource, setActiveSource] = useState(null);
   const [activeTags, setActiveTags] = useState([]);
-  const [selected, setSelected] = useState("i01");
+  const [selected, setSelected] = useState(null);
   const [focusedIdx, setFocusedIdx] = useState(0);
   // Reactions: { itemId: 'love' | 'like' | 'dislike' | null }
-  const [reaction, setReaction] = useState({ "i01": "love", "i05": "like", "i09": "love" });
+  const [reaction, setReaction] = useState({});
   const [notInterested, setNotInterested] = useState(new Set());
-  const [seen, setSeen] = useState(new Set(["i01"]));
+  const [seen, setSeen] = useState(new Set());
   const [showSeen, setShowSeen] = useState(false);
   const [paneOpen, setPaneOpen] = useState(true);
   const [paneTab, setPaneTab] = useState("split");
@@ -822,7 +834,7 @@ function App() {
   });
   const [memos, setMemos] = useState(window.MEMOS);
   const [quests, setQuests] = useState(window.QUESTS);
-  const [sources, setSources] = useState(window.SOURCES);
+  const [sources, setSources] = useState([]);
   const [timeframe, setTimeframe] = useState("all");
   const [qualityFilter, setQualityFilter] = useState(false);
   const [search, setSearch] = useState("");
@@ -855,9 +867,21 @@ function App() {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
   }, [dark]);
 
+  const [apiItems, setApiItems] = useState([]);
+  useEffect(() => {
+    if (!window.KF_API) return;
+    Promise.all([
+      window.KF_API.fetchItems({ limit: 200 }),
+      window.KF_API.fetchSources(),
+    ]).then(([itemsData, sourcesData]) => {
+      setApiItems((itemsData || []).map(window.KF_API.mapItem));
+      setSources(sourcesData || []);
+    }).catch(err => console.error("KF API fetch failed:", err));
+  }, []);
+
   // Filter items (quest/source/tag/search — timeframe + quality handled in Feed)
   const items = useMemo(() => {
-    return window.ITEMS.filter(it => {
+    return apiItems.filter(it => {
       const srcId = it.source || (it.sources && it.sources[0]?.id);
       if (notInterested.has(it.id)) return false;
       if (activeQuest && it.quest !== activeQuest) return false;
@@ -866,7 +890,7 @@ function App() {
       if (search && !(it.title + " " + it.summary).toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [activeQuest, activeSource, activeTags, notInterested, search]);
+  }, [apiItems, activeQuest, activeSource, activeTags, notInterested, search]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -977,7 +1001,7 @@ function App() {
   const onLoadMore = useCallback(() => {
     setLoading(true);
     setTimeout(() => {
-      setLoaded(n => Math.min(n + 3, window.ITEMS.length));
+      setLoaded(n => n + 10);
       setLoading(false);
     }, 700);
   }, []);
@@ -1007,9 +1031,13 @@ function App() {
     showToast("✓ Memo saved to garden");
   };
 
-  const selectedItem = window.ITEMS.find(i => i.id === selected);
+  const selectedItem = apiItems.find(i => i.id === selected);
   const sourceMap = Object.fromEntries(sources.map(s => [s.id, s]));
-  const stats = { ...window.STATS, totalToday: items.length || window.STATS.totalToday };
+  const stats = {
+    ...window.STATS,
+    totalToday: items.length || window.STATS.totalToday,
+    newToday: apiItems.length > 0 ? items.filter(it => it.new).length : window.STATS.newToday,
+  };
 
   return (
     <div className="app" data-pane-open={paneOpen && view === "radar"} data-density={density} data-screen-label="01 Daily Radar">
@@ -1035,6 +1063,7 @@ function App() {
         {view === "radar" && (
           <Feed
             items={items}
+            sources={sources}
             selected={selected}
             focusedIdx={focusedIdx}
             onSelect={onSelect}
