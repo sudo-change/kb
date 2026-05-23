@@ -11,7 +11,6 @@ services:
       - CACHE_EXPIRE=300
     restart: unless-stopped
     healthcheck:
-      # RSSHub image is node-based; use node's built-in http to avoid relying on wget/curl
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:1200/healthz', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
       timeout: 5s
@@ -19,36 +18,70 @@ services:
       start_period: 30s
 
   # -- Collector: Fetches from RSSHub + yt-dlp, stores in SQLite --
-  # collector:
-  #   build: .
-  #   volumes:
-  #     - ./data:/app/data
-  #     - ./cookies:/app/cookies:ro
-  #     - ./config:/app/config:ro
-  #   environment:
-  #     # Override sources.yaml's default localhost so container can resolve RSSHub
-  #     - RSSHUB_URL=http://rsshub:1200
-  #   depends_on:
-  #     rsshub:
-  #       condition: service_healthy
-  #   restart: unless-stopped
+  collector:
+    build: .
+    volumes:
+      - ./data:/app/data
+      - ./cookies:/app/cookies:ro
+      - ./config:/app/config:ro
+    environment:
+      - RSSHUB_URL=http://rsshub:1200
+      - KF_DB_PATH=/app/data/kf.db
+      - KF_COOKIES=/app/cookies/cookies.txt
+    depends_on:
+      rsshub:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python collector/main.py
 
   # -- API: FastAPI serving data to Quarry + MCP --
-  # api:
-  #   build: .
-  #   ports:
-  #     - "8000:8000"
-  #   volumes:
-  #     - ./data:/app/data:ro
-  #   command: uvicorn api.main:app --host 0.0.0.0 --port 8000
-  #   restart: unless-stopped
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - KF_DB_PATH=/app/data/kf.db
+    depends_on:
+      - collector
+    restart: unless-stopped
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
-  # -- MCP Server: Exposes KB to Claude/Windsurf/Cursor --
-  # mcp:
-  #   build: .
-  #   volumes:
-  #     - ./data:/app/data:ro
-  #   command: python mcp_server/server.py
-  #   restart: unless-stopped
+  # -- MCP Server: Exposes KB to Claude Desktop / Cursor / Windsurf --
+  mcp:
+    build: .
+    volumes:
+      - ./data:/app/data
+    environment:
+      - KF_DB_PATH=/app/data/kf.db
+      - KB_API_BASE=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python mcp_server/server.py
+
+  # -- Telegram Bot: Daily digest delivery --
+  telegram_bot:
+    build: .
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - KF_DB_PATH=/app/data/kf.db
+      - KB_API_BASE=http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+    command: python -m telegram_bot.scheduler
 
 volumes: {}

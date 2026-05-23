@@ -43,3 +43,16 @@ docker-compose up -d
 - Architecture: `docs/ARCHITECTURE.md`
 - YT Skill: `.devin/skills/yt-extract/SKILL.md`
 - Frontend: `quarry/`
+
+## Legacy Reference
+
+Working legacy implementations live at `D:\KnowledgeBase\kb-clean\projects\knowledgeforge\`.
+
+Before writing any collector from scratch, read the legacy version. See `docs/legacy-manifest.md` for full salvage audit.
+
+High-value legacy files:
+- `collectors/hackernews.py` — HN API pagination + scoring
+- `collectors/reddit.py` — Reddit RSS + PRAW, rate-limit handling
+- `collectors/rss.py` — feedparser + per-feed timestamp cursors
+- `core/database.py` — SQLite + FTS5 triggers, migration support
+- `core/scheduler.py` — APScheduler + retry logic

@@ -5,14 +5,28 @@ Personal intelligence pipeline. Collects from Twitter, Reddit, YouTube, HN, GitH
 ## Quick Start
 
 ```bash
+# 1. Copy env and fill in tokens
+cp .env.example .env
+
+# 2. Start full stack (RSSHub + Collector + API + MCP + Telegram)
+docker-compose up -d
+
+# 3. Verify all services healthy
+docker-compose ps
+
+# Check API
+curl http://localhost:8000/health
+
+# Check RSSHub
+curl http://localhost:1200/healthz
+```
+
+```bash
 # YouTube extraction (works standalone, no Docker)
 python scripts/yt_extract.py "https://youtube.com/watch?v=VIDEO_ID"
 
-# Start RSSHub (feed aggregation)
-docker-compose up -d rsshub
-
-# Full stack (when all services built)
-docker-compose up -d
+# Run collector once (local, no Docker)
+python collector/main.py --once
 ```
 
 ## Structure

@@ -46,3 +46,10 @@ desktop.ini
 .vscode/
 .idea/
 *.swp
+
+# Local tooling
+.claude/
+mcp-boilerplate-main/
+
+# Stray download artifacts
+*.info.json
