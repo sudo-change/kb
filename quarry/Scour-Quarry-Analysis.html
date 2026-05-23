@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Scour.ing × Quarry — Analysis</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #f4f1e9;
+    --surface: #fbfaf5;
+    --ink: #14110d;
+    --ink-2: #322d24;
+    --muted: #807866;
+    --rule: #d9d2c1;
+    --accent: oklch(72% 0.16 65);
+    --accent-ink: oklch(38% 0.10 65);
+    --accent-soft: oklch(94% 0.05 75);
+    --good: oklch(55% 0.14 145);
+    --good-soft: oklch(94% 0.05 145);
+    --bad: oklch(55% 0.15 25);
+    --bad-soft: oklch(94% 0.05 25);
+    --blue: oklch(55% 0.14 250);
+    --blue-soft: oklch(94% 0.04 250);
+    --font-serif: "Newsreader", Georgia, serif;
+    --font-sans: "Inter Tight", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0 0 80px;
+  }
+
+  /* === Header === */
+  .doc-header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 48px 60px 40px;
+  }
+  .doc-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    opacity: 0.5;
+    margin-bottom: 12px;
+  }
+  .doc-title {
+    font-family: var(--font-serif);
+    font-size: 48px;
+    line-height: 1.05;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    margin: 0 0 16px;
+  }
+  .doc-title span { opacity: 0.35; }
+  .doc-sub {
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.4;
+    opacity: 0.65;
+    max-width: 640px;
+    font-style: italic;
+  }
+  .doc-meta {
+    display: flex; gap: 24px;
+    margin-top: 28px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.45;
+  }
+
+  /* === Layout === */
+  .doc-body { max-width: 1100px; margin: 0 auto; padding: 0 60px; }
+
+  /* === Section === */
+  .section { margin-top: 56px; }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 8px;
+    margin-bottom: 24px;
+    display: flex; justify-content: space-between;
+  }
+
+  /* === Ranking explainer === */
+  .ranking-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .ranking-col {
+    padding: 24px 28px;
+    background: var(--surface);
+  }
+  .ranking-col.quarry { background: color-mix(in oklch, var(--accent) 6%, var(--surface)); }
+  .ranking-col h3 {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 0 0 16px;
+    color: var(--muted);
+  }
+  .ranking-col h3 strong { color: var(--ink); }
+  .formula {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 0 0 16px;
+    color: var(--ink-2);
+    line-height: 1.7;
+  }
+  .formula .highlight { color: var(--accent-ink); font-weight: 700; }
+  .ranking-note {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  /* === Feature comparison table === */
+  .feat-table { width: 100%; border-collapse: collapse; }
+  .feat-table th {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 8px 16px 10px;
+    text-align: left;
+    color: var(--muted);
+    border-bottom: 2px solid var(--rule);
+    background: var(--surface);
+  }
+  .feat-table th:first-child { width: 28%; }
+  .feat-table th:nth-child(2), .feat-table th:nth-child(3) { width: 22%; }
+  .feat-table th:last-child { width: 28%; }
+  .feat-table td {
+    padding: 12px 16px;
+    vertical-align: top;
+    border-bottom: 1px solid var(--rule);
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .feat-table tr:last-child td { border-bottom: none; }
+  .feat-table tr:hover td { background: var(--surface); }
+  .feat-name {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 13px;
+  }
+  .feat-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 5px;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-scour { background: var(--blue-soft); color: var(--blue); }
+  .tag-quarry { background: var(--accent-soft); color: var(--accent-ink); }
+  .tag-both { background: var(--good-soft); color: var(--good); }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .chip.yes { background: var(--good-soft); color: var(--good); }
+  .chip.partial { background: var(--accent-soft); color: var(--accent-ink); }
+  .chip.no { background: var(--bad-soft); color: var(--bad); }
+  .chip.na { background: var(--surface); color: var(--muted); border: 1px solid var(--rule); }
+
+  /* === Adopt cards === */
+  .adopt-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .adopt-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .adopt-card.p1 { border-top: 3px solid var(--good); }
+  .adopt-card.p2 { border-top: 3px solid var(--accent); }
+  .adopt-card.p3 { border-top: 3px solid var(--muted); }
+  .adopt-priority {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .adopt-card.p1 .adopt-priority { color: var(--good); }
+  .adopt-card.p2 .adopt-priority { color: var(--accent-ink); }
+  .adopt-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .adopt-desc {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    text-wrap: pretty;
+    flex: 1;
+  }
+  .adopt-effort {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    display: flex; justify-content: space-between;
+    padding-top: 8px;
+    border-top: 1px dashed var(--rule);
+  }
+  .adopt-effort strong { color: var(--ink-2); }
+
+  /* === Philosophy diff === */
+  .phil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .phil-col {
+    padding: 24px 28px;
+    background: var(--surface);
+  }
+  .phil-col.quarry { background: color-mix(in oklch, var(--accent) 5%, var(--surface)); }
+  .phil-col h3 {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .phil-col .phil-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: block;
+  }
+  .phil-point {
+    display: flex; gap: 10px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+  .phil-point .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rule);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+  .phil-col.quarry .phil-point .dot { background: var(--accent); }
+
+  /* === Verdict === */
+  .verdict-box {
+    background: var(--ink);
+    color: var(--bg);
+    border-radius: 6px;
+    padding: 32px 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 28px;
+  }
+  .verdict-col h4 {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    opacity: 0.45;
+    margin: 0 0 10px;
+  }
+  .verdict-item {
+    display: flex; gap: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    opacity: 0.85;
+  }
+  .verdict-item .v-dot { flex-shrink: 0; margin-top: 5px; }
+
+  /* keyboard chip */
+  .kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 1px 5px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    color: var(--ink-2);
+    margin: 0 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <div class="doc-eyebrow">Product teardown · May 2026</div>
+  <h1 class="doc-title">Scour.ing <span>×</span> Quarry</h1>
+  <div class="doc-sub">What scour.ing built, how they did it, what Quarry should steal, and where Quarry is already ahead.</div>
+  <div class="doc-meta">
+    <span>Scour: 1 engineer · self-funded · 2,919 users · 24,546 sources</span>
+    <span>Quarry: personal-first · RSSHub-backed · knowledge garden</span>
+  </div>
+</div>
+
+<div class="doc-body">
+
+  <!-- === PHILOSOPHY === -->
+  <div class="section">
+    <div class="section-label"><span>Core philosophy</span></div>
+    <div class="phil-grid">
+      <div class="phil-col">
+        <h3>Scour.ing</h3>
+        <span class="phil-tag">Hidden gems over viral content</span>
+        <div class="phil-point"><div class="dot"></div><div>Surfaces content you'd <em>never find otherwise</em> — indie blog with 50 readers can beat a viral post</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Deliberately uses <strong>zero popularity signals</strong> — no vote counts, shares, or backlinks factor in</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Ranking = semantic embedding distance from your stated interests (binary quantized embeddings + Hamming distance)</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Explicit interests only — one click on a cooking article won't flood you with cooking content</div></div>
+        <div class="phil-point"><div class="dot"></div><div>24,546 community-sourced feeds · 1.68M domain blocklist · filters listicles + emoji-led titles</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Source diversity enforced — no single source dominates</div></div>
+      </div>
+      <div class="phil-col quarry">
+        <h3>Quarry</h3>
+        <span class="phil-tag">1hr/day intelligence compression</span>
+        <div class="phil-point"><div class="dot"></div><div>Surfaces <em>what's hitting today</em> in your quest areas — you want to know what's moving, not just what's obscure</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Vote-weighted scoring: platform votes × source reliability + saves — popularity is a <strong>useful signal</strong> for bug bounty/AI/ARR content</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Quest-based intent buckets — not just interests, but named missions with tracked progress</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Capture layer: reading → annotation → memo garden → spaced recall. Scour stops at reading.</div></div>
+        <div class="phil-point"><div class="dot"></div><div>RSSHub as feed backbone — 1,000+ routes, self-hostable, no community dependency</div></div>
+        <div class="phil-point"><div class="dot"></div><div>Discipline metric: streak tracking. Reading is a practice, not just discovery.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === RANKING === -->
+  <div class="section">
+    <div class="section-label"><span>Ranking engine — side by side</span></div>
+    <div class="ranking-grid">
+      <div class="ranking-col">
+        <h3><strong>Scour.ing</strong> — semantic embeddings</h3>
+        <div class="formula">
+          score = <span class="highlight">cosine_sim(article_embedding, best_interest)</span><br>
+          + recency_bucket_adjustment<br>
+          + source_prominence_adjustment (from reactions)<br>
+          <br>
+          <span style="opacity:0.5">// No platform votes used at all</span><br>
+          <span style="opacity:0.5">// Binary quantized → Hamming distance</span><br>
+          <span style="opacity:0.5">// Real-time, not pre-computed</span>
+        </div>
+        <div class="ranking-note">Reactions (Love/Like/Dislike) make gradual, confidence-weighted adjustments to source prominence and topic balance. They don't add new topics. Decay over time prevents any source from dominating permanently.</div>
+      </div>
+      <div class="ranking-col quarry">
+        <h3><strong>Quarry</strong> — vote-weighted formula</h3>
+        <div class="formula">
+          score = (<span class="highlight">platform_votes × src_reliability</span><br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ saves × 3) / <span class="highlight">(age_h + 2)^0.7</span><br>
+          <br>
+          where src_reliability = f(thumbs_history)<br>
+          <br>
+          <span style="opacity:0.5">// Transparent, visible, hoverable</span><br>
+          <span style="opacity:0.5">// No embedding model or API needed</span>
+        </div>
+        <div class="ranking-note">Thumbs △/▽ adjust source reliability over time. Saves carry 3× weight (action > click). Age decay at 0.7 exponent keeps older-but-relevant content in view longer than HN's aggressive gravity. Score visible on hover.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === FEATURE TABLE === -->
+  <div class="section">
+    <div class="section-label"><span>Feature inventory</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">Scour · Quarry · verdict</span></div>
+    <table class="feat-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Scour.ing</th>
+          <th>Quarry</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="feat-name">Interest / topic definition</div></td>
+          <td><span class="chip yes">✓ free-form text</span></td>
+          <td><span class="chip partial">Quests (named buckets)</span></td>
+          <td>Scour: type anything → embeddings. Quarry: named missions with color + count. Quarry's model is more intentional; Scour's is lower friction.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Reaction granularity</div></td>
+          <td><span class="chip yes">Love / Like / Dislike</span></td>
+          <td><span class="chip partial">△ / ▽ (binary)</span></td>
+          <td>3 levels vs 2. Love = bookmark + strong signal. Like = softer. Quarry should upgrade to Love/Like/Dislike/Save as separate gestures.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Keyboard navigation</div></td>
+          <td><span class="chip yes">j/k/o/s/a/l/d/x + go-to shortcuts</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>j/k to move, o to open, s to save, a=love, l=like, d=dislike, x=not interested. This is table stakes for a reading tool. Fast to add.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Timeframe filter</div></td>
+          <td><span class="chip yes">Fresh / Day / Week / Month</span></td>
+          <td><span class="chip partial">Filter pills (new/high)</span></td>
+          <td>Scour's Fresh mode balances recency across buckets. Quarry has pills but no time-window logic. Add Fresh/1d/1w tabs.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Content quality filter</div></td>
+          <td><span class="chip yes">1.68M blocklist · no listicles · no emoji titles</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>Scour filters "5 Ways to…" and emoji-led titles before ranking. Easy to add as a toggle in Quarry (regex on title).</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Deduplication</div></td>
+          <td><span class="chip yes">Same story → show once</span></td>
+          <td><span class="chip yes">Merged card + multi-source badges</span></td>
+          <td>Both dedupe. Quarry shows the merge visually (deduped ×N). Scour silently picks one. Quarry's is more transparent — advantage.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Source diversity enforcement</div></td>
+          <td><span class="chip yes">Algorithmic cap per source</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>Prevents any single source flooding feed. Scour caps + decays source prominence. Simple to add: max N items per source per page load.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">"Why didn't I see this?"</div></td>
+          <td><span class="chip yes">Paste URL → explanation</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>Huge trust builder. "Source not in your feeds / filtered as listicle / ranked below page 1." Quarry equivalent: paste URL → "not in any source" or "score 4.2 — below your 7.0 floor."</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">OPML import</div></td>
+          <td><span class="chip yes">Import + infer interests</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>Bring your existing RSS subscriptions. Medium effort. High value for onboarding (the "setup in 2 min" hook).</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Email digest</div></td>
+          <td><span class="chip yes">Daily / weekly</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>Aligns perfectly with "Daily Radar" concept. The email IS the radar for days you don't open the app. Habit adhesion mechanism.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Reading history</div></td>
+          <td><span class="chip yes">Private · "seen" filtering</span></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td>Auto-hide seen items by default. "Show seen" toggle. History tab. Find posts you forgot to bookmark. Very fast to add.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Knowledge capture</div></td>
+          <td><span class="chip no">Stops at Likes page</span></td>
+          <td><span class="chip yes">Memo garden · annotation · tags</span></td>
+          <td>Quarry's biggest differentiator. Scour has no writing layer. Quarry: read → annotate → memo → recall. This is the entire "Memos becomes junk drawer" defense.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Spaced recall</div></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td><span class="chip yes">Recall tab · weekly digest</span></td>
+          <td>Quarry wins. Scour has no memory layer. "Revisit in 7 days" is the anti-junk-drawer mechanism Scour entirely lacks.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Side-by-side reader + writer</div></td>
+          <td><span class="chip no">No writing surface</span></td>
+          <td><span class="chip yes">Read left · write memo right</span></td>
+          <td>Quarry wins. Forces note-taking as part of reading flow. The "O'Reilly daily radar" pattern.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Discipline tracking</div></td>
+          <td><span class="chip no">Not implemented</span></td>
+          <td><span class="chip yes">21-day streak grid · 1hr drill</span></td>
+          <td>Quarry wins. Scour has no consistency mechanic. The streak answers Khabib's question.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Keyboard shortcuts</div></td>
+          <td><span class="chip yes">Comprehensive</span></td>
+          <td><span class="chip no">None</span></td>
+          <td>This is the fastest win. j/k navigation alone makes Quarry feel like a real reader.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Source management</div></td>
+          <td><span class="chip yes">24,546 community sources</span></td>
+          <td><span class="chip yes">RSSHub route browser (1,000+ routes)</span></td>
+          <td>Different models. Scour is community-curated. Quarry is self-curated via RSSHub. Quarry has more control + privacy.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Mobile / PWA</div></td>
+          <td><span class="chip yes">PWA · add to home screen</span></td>
+          <td><span class="chip no">Desktop-only</span></td>
+          <td>Not a priority for personal use, but worth adding a <code>&lt;meta name="mobile-web-app-capable"&gt;</code> and service worker later.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Not interested signal</div></td>
+          <td><span class="chip yes">x key · per item</span></td>
+          <td><span class="chip no">Only thumbs down</span></td>
+          <td>"Not interested" is lighter than Dislike — it says "skip" without training the source down. Useful for off-quest items that aren't bad.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- === ADOPT CARDS === -->
+  <div class="section">
+    <div class="section-label"><span>What to adopt · prioritized</span></div>
+    <div class="adopt-grid">
+      <div class="adopt-card p1">
+        <div class="adopt-priority">Priority 1 · High value · Low effort</div>
+        <div class="adopt-title">Keyboard navigation</div>
+        <div class="adopt-desc">
+          <kbd class="kbd">j</kbd><kbd class="kbd">k</kbd> to move between items. <kbd class="kbd">o</kbd> to open in reader pane. <kbd class="kbd">s</kbd> to save. <kbd class="kbd">x</kbd> to skip. <kbd class="kbd">a</kbd> to love (save + strong signal), <kbd class="kbd">d</kbd> to dislike. Makes Quarry feel like a real RSS reader — fast, keyboard-native.
+        </div>
+        <div class="adopt-effort"><span>Effort</span><strong>~30 min (useEffect + keydown)</strong></div>
+      </div>
+      <div class="adopt-card p1">
+        <div class="adopt-priority">Priority 1 · High value · Low effort</div>
+        <div class="adopt-title">3-level reactions: Love / Like / Dislike</div>
+        <div class="adopt-desc">Replace △/▽ with ♥ Love (saves to garden + strong signal), ↑ Like (soft signal), ↓ Dislike (drops source reliability). Love ≠ Save — Love is "this shaped my thinking"; Like is "good, move on." More signal gradient for the scoring formula.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~45 min (update Item + data model)</strong></div>
+      </div>
+      <div class="adopt-card p1">
+        <div class="adopt-priority">Priority 1 · High value · Low effort</div>
+        <div class="adopt-title">Hide seen items by default</div>
+        <div class="adopt-desc">Auto-track items you've clicked or reacted to. Hide them from the feed by default. Toggle "show seen" in filter pills. Keeps the radar fresh every session — you never re-read what you've already processed. Reading history tab auto-generates from this.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~30 min (useState Set + localStorage)</strong></div>
+      </div>
+      <div class="adopt-card p1">
+        <div class="adopt-priority">Priority 1 · High value · Low effort</div>
+        <div class="adopt-title">Timeframe filter</div>
+        <div class="adopt-desc">Fresh (default, last 24h with recency spread) / 3d / 1w / 1m. Swap the current "new/saved/high" pills for time-windowed views. Fresh mode: show a mix of recent items, not just newest-first. Prevents the "only the last hour matters" trap.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~20 min (filter logic already exists)</strong></div>
+      </div>
+      <div class="adopt-card p1">
+        <div class="adopt-priority">Priority 1 · Medium value · Low effort</div>
+        <div class="adopt-title">Content quality filters</div>
+        <div class="adopt-desc">Toggle to filter: listicle titles ("5 Ways to…", "Top 10…"), emoji-led titles, duplicate domain items. Simple regex + a settings panel. Scour runs this before ranking on 1.68M domains — Quarry runs it per-session client-side. Same effect, zero server.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~20 min (regex filter in items memo)</strong></div>
+      </div>
+      <div class="adopt-card p1">
+        <div class="adopt-priority">Priority 1 · Medium value · Low effort</div>
+        <div class="adopt-title">Source diversity cap</div>
+        <div class="adopt-desc">Max 2 items from any single source per feed page. Prevents one highly-active source (e.g. HN) from crowding out everything else. Already have source tracking — just add a per-source counter during filter/sort.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~15 min (reduce in filter pass)</strong></div>
+      </div>
+      <div class="adopt-card p2">
+        <div class="adopt-priority">Priority 2 · High value · Medium effort</div>
+        <div class="adopt-title">"Why didn't I see this?" tool</div>
+        <div class="adopt-desc">Paste any URL → Quarry checks: Is the domain in any active source? Is the score below your floor? Was it deduped away? Was it filtered by quality rules? Great for trust, great for debugging your source setup. Shows the scoring formula is working.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~2h (URL lookup + score simulation)</strong></div>
+      </div>
+      <div class="adopt-card p2">
+        <div class="adopt-priority">Priority 2 · High value · Medium effort</div>
+        <div class="adopt-title">OPML import</div>
+        <div class="adopt-desc">Upload your existing RSS reader's OPML export → auto-populate sources. Parse the XML client-side, map known feeds to RSSHub routes, add the rest as raw RSS URLs. The "setup in 2 minutes" onboarding hook if Quarry ever becomes a product.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>~3h (XML parse + route mapping)</strong></div>
+      </div>
+      <div class="adopt-card p2">
+        <div class="adopt-priority">Priority 2 · High value · Medium effort</div>
+        <div class="adopt-title">Daily email digest</div>
+        <div class="adopt-desc">The radar, emailed at 7am. Top 5–8 items from your Quests, your daily memo prompt, a recall item from last month. Habit adhesion: the email arrives whether or not you open the app. Answers Chase Hughes's critique about beating Twitter's dopamine hit.</div>
+        <div class="adopt-effort"><span>Effort</span><strong>Needs backend · out of scope for prototype</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === DO NOT ADOPT === -->
+  <div class="section">
+    <div class="section-label"><span>What NOT to adopt from scour.ing</span></div>
+    <table class="feat-table">
+      <thead>
+        <tr><th>Feature</th><th>Why scour.ing has it</th><th>Why Quarry should skip</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="feat-name">Zero popularity signals</div></td>
+          <td>Their philosophy is hidden gems over viral. Makes sense for breadth-of-web discovery.</td>
+          <td>Your quests (bug bounty, ARR, AI disruption) benefit from knowing what's getting traction NOW. A $50k bounty report with 600 upvotes IS the signal. Don't suppress it.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Community-sourced feeds (24,546)</div></td>
+          <td>Discovery across the whole web. Social proof. Community cold-start is solved by crowd.</td>
+          <td>Personal-first. RSSHub gives 1,000+ routes you control. Community sources add noise and trust issues. You're curating your signal, not the crowd's.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Embedding-based semantic matching</div></td>
+          <td>Finds relevant content even when phrased differently. Works for niche, obscure interests.</td>
+          <td>Your interests are concrete quest names with 10 example items each (per the strategic plan). Keyword + vote scoring works. If you ever want embeddings, use a local ONNX model client-side — no API.</td>
+        </tr>
+        <tr>
+          <td><div class="feat-name">Public Likes page + RSS feed of Likes</div></td>
+          <td>Community discovery. Others subscribe to your taste.</td>
+          <td>Personal tool, not a publishing business yet. Greene's advice (your filtered output as product) is the right long-term direction — but that's V2, not today.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- === NEWSLETTER ARCHITECTURE === -->
+  <div class="section">
+    <div class="section-label"><span>Daily email digest · Quarry architecture</span><span style="font-family:var(--font-mono);font-size:10px;color:var(--muted)">your design, not scour.ing's</span></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div style="background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:24px;">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:var(--muted);margin-bottom:12px;">Scour.ing digest</div>
+        <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--ink);margin-bottom:8px;">Weekly, Fridays at 10 UTC</div>
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.55;">Top 10 posts from past week · relevance-ranked · reaction buttons in email · interest recommendations at bottom. One digest. One cadence. No categories.</div>
+      </div>
+      <div style="background:color-mix(in oklch,var(--accent) 5%,var(--surface));border:1px solid var(--rule);border-top:3px solid var(--accent);border-radius:6px;padding:24px;">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.14em;color:var(--accent-ink);margin-bottom:12px;">Quarry digest · your concept</div>
+        <div style="font-family:var(--font-serif);font-size:16px;font-weight:500;color:var(--ink);margin-bottom:8px;">Daily, 7am · 5–7 newsletters by category</div>
+        <div style="font-size:13px;color:var(--ink-2);line-height:1.55;">Routine fetches all sources → Claude summarizes per category → sends category-specific newsletters. Each is a mini-radar for that quest thread.</div>
+      </div>
+    </div>
+
+    <div style="background:var(--ink);color:var(--bg);border-radius:6px;padding:28px 32px;">
+      <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.14em;opacity:0.45;margin-bottom:20px;">Newsletter categories · per daily routine run</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px;">
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">01 · Security</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">Bug bounty · CVEs · new bug classes · disclosed reports · tooling drops</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">02 · AI</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">Model releases · agent architecture · evals · pricing shifts · capability jumps</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">03 · Dev / Build</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">OSS releases · tools · frameworks · Show HN · engineering practices</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">04 · Money</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">Solo ARR reports · pricing strategy · distribution · path to $1M case studies</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">05 · Crypto</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">Protocol updates · DeFi yield · smart contract bugs · on-chain flows</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">06 · Niches</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">Deep-work · craft · taste · books · mental models · discipline</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border-radius:4px;padding:14px;">
+          <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.1em;opacity:0.5;margin-bottom:6px;">07 · Trends</div>
+          <div style="font-size:13px;line-height:1.5;opacity:0.85;">Emerging opportunities · market shifts · underserved gaps · early signals</div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.12);padding-top:20px;">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.14em;opacity:0.45;margin-bottom:16px;">Routine architecture</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;">
+          <div style="padding:0 16px 0 0;border-right:1px solid rgba(255,255,255,0.12);">
+            <div style="font-family:var(--font-mono);font-size:9px;opacity:0.5;margin-bottom:6px;">Step 1</div>
+            <div style="font-size:13px;opacity:0.85;line-height:1.5;">Fetch all RSSHub routes → parse items → deduplicate by URL normalization</div>
+          </div>
+          <div style="padding:0 16px;border-right:1px solid rgba(255,255,255,0.12);">
+            <div style="font-family:var(--font-mono);font-size:9px;opacity:0.5;margin-bottom:6px;">Step 2</div>
+            <div style="font-size:13px;opacity:0.85;line-height:1.5;">Classify each item into a category via title/tags/source heuristics (no API needed)</div>
+          </div>
+          <div style="padding:0 16px;border-right:1px solid rgba(255,255,255,0.12);">
+            <div style="font-family:var(--font-mono);font-size:9px;opacity:0.5;margin-bottom:6px;">Step 3</div>
+            <div style="font-size:13px;opacity:0.85;line-height:1.5;">Claude reads top N per category → writes a 3–5 sentence synthesis (what matters, why now)</div>
+          </div>
+          <div style="padding:0 0 0 16px;">
+            <div style="font-family:var(--font-mono);font-size:9px;opacity:0.5;margin-bottom:6px;">Step 4</div>
+            <div style="font-size:13px;opacity:0.85;line-height:1.5;">Send 5–7 emails (one per non-empty category) · reactions link back to Quarry app</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.12);padding-top:16px;margin-top:16px;font-size:12px;opacity:0.4;font-family:var(--font-mono);">
+        Trigger: cron at 06:45 UTC daily · MCP or REST fetch · Claude haiku (cheapest) for summarization · only AI cost in the entire stack
+      </div>
+    </div>
+  </div>
+
+  <!-- === ROADMAP === -->
+  <div class="section">
+    <div class="section-label"><span>Quarry roadmap · phased</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:32px;">
+      <div style="background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--good);border-radius:6px;padding:20px;">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--good);margin-bottom:10px;">Phase 1 · Done ✓</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--ink-2);line-height:1.4;">
+          <div>✓ Daily radar feed with infinite scroll</div>
+          <div>✓ RSSHub source browser (1,000+ routes)</div>
+          <div>✓ 4-level reactions: Love / Like / Dislike / Not Interested</div>
+          <div>✓ Keyboard navigation (j/k/o/a/l/d/x/s/u/?)</div>
+          <div>✓ Timeframe filter: Fresh / Today / 3d / 1w</div>
+          <div>✓ Quality filter (no listicles, no emoji titles)</div>
+          <div>✓ Deduplication — same story shown once</div>
+          <div>✓ Vote-weighted scoring (transparent, no API)</div>
+          <div>✓ Memos garden + spaced recall</div>
+          <div>✓ Quest-based intent buckets (add/rename)</div>
+          <div>✓ Streak tracker · 21-day grid</div>
+          <div>✓ Dark/light + density + type tweaks</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--rule);border-top:3px solid oklch(72% 0.16 65);border-radius:6px;padding:20px;">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:oklch(38% 0.10 65);margin-bottom:10px;">Phase 2 · Next sprint</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--ink-2);line-height:1.4;">
+          <div>→ Daily email digest (7 category newsletters)</div>
+          <div>→ Claude summarization routine (MCP / cron)</div>
+          <div>→ "Why didn't I see this?" URL checker</div>
+          <div>→ Reading history (auto-track + private)</div>
+          <div>→ Domain block list (per-item, exact + wildcard)</div>
+          <div>→ Seen items persistence (localStorage)</div>
+          <div>→ Paywall detection badge</div>
+          <div>→ Substack + arXiv first-class source types</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--rule);border-top:3px solid var(--muted);border-radius:6px;padding:20px;">
+        <div style="font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:0.12em;color:var(--muted);margin-bottom:10px;">Phase 3 · Future</div>
+        <div style="display:flex;flex-direction:column;gap:7px;font-size:13px;color:var(--ink-2);line-height:1.4;">
+          <div>→ OPML import (auto-detect + map to RSSHub)</div>
+          <div>→ Source diversity cap (max N per source)</div>
+          <div>→ Topic exclusion filters</div>
+          <div>→ Public Likes feed (RSS/Atom export)</div>
+          <div>→ Local ONNX semantic matching (no API)</div>
+          <div>→ PWA + mobile home screen install</div>
+          <div>→ Productize: filtered output as newsletter product</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- === VERDICT === -->
+  <div class="section">
+    <div class="section-label"><span>Verdict</span></div>
+    <div class="verdict-box">
+      <div class="verdict-col">
+        <h4>Scour.ing strengths</h4>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--good)">✓</div><div>Semantic matching finds things you didn't know to search for</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--good)">✓</div><div>Community sources = zero setup, immediate breadth</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--good)">✓</div><div>Keyboard shortcuts + reading UX feel native</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--good)">✓</div><div>No popularity bias — genuinely surfaces obscure quality</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--good)">✓</div><div>Quality filtering (1.68M blocklist) is a major moat</div></div>
+      </div>
+      <div class="verdict-col">
+        <h4>Quarry advantages</h4>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">●</div><div>Memos + recall: turns reading into knowledge that compounds</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">●</div><div>Quests = named intent, not vague "interests"</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">●</div><div>Streak + discipline layer — Scour has no consistency mechanic</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">●</div><div>Transparent scoring — you know exactly why something ranked</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">●</div><div>RSSHub: full control, no community cold-start, self-hostable</div></div>
+      </div>
+      <div class="verdict-col">
+        <h4>Next 3 things to build</h4>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">1.</div><div>Keyboard nav — j/k/o/s/x/a/d. 30 min. Makes it feel real.</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">2.</div><div>3-level reactions (Love/Like/Dislike) + hide seen items</div></div>
+        <div class="verdict-item"><div class="v-dot" style="color:var(--accent)">3.</div><div>Timeframe filter + source diversity cap (max 2 per source)</div></div>
+        <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.12);font-size:12px;opacity:0.45;font-family:var(--font-mono)">Then: "Why didn't I see this?" · OPML import · email digest</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+nul
+# Secrets
+Cookie.txt
+cookies/
+.env
+
+# Data
+data/*.db
+data/*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
