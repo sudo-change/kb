@@ -24,6 +24,8 @@ services:
       - ./data:/app/data
       - ./cookies:/app/cookies:ro
       - ./config:/app/config:ro
+    env_file:
+      - .env
     environment:
       - RSSHUB_URL=http://rsshub:1200
       - KF_DB_PATH=/app/data/kf.db
@@ -55,8 +57,12 @@ services:
       start_period: 15s
 
   # -- MCP Server: Exposes KB to Claude Desktop / Cursor / Windsurf --
+  # NOTE: MCP uses stdio transport — run locally with Claude Desktop, not as
+  # a persistent Docker service.  The container is kept for one-shot use:
+  #   docker compose run --rm mcp
   mcp:
     build: .
+    stdin_open: true
     volumes:
       - ./data:/app/data
     environment:
@@ -65,8 +71,10 @@ services:
     depends_on:
       api:
         condition: service_healthy
-    restart: unless-stopped
+    restart: "no"
     command: python -m mcp_server.server
+    profiles:
+      - mcp
 
   # -- Telegram Bot: Daily digest delivery --
   telegram_bot:
