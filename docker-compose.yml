@@ -26,6 +26,7 @@ services:
   #     - ./cookies:/app/cookies:ro
   #     - ./config:/app/config:ro
   #   environment:
+  #     # Override sources.yaml's default localhost so container can resolve RSSHub
   #     - RSSHUB_URL=http://rsshub:1200
   #   depends_on:
   #     rsshub:

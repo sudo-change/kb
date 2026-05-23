@@ -12,9 +12,15 @@ docker-compose up -d
 
 ## Verification
 
-- YT extraction: Check output .md file has Title, Channel, Duration, Transcript sections
-- Dependencies: `python scripts/yt_extract.py --help` (validates yt-dlp + node on PATH)
-- RSSHub: `curl http://localhost:1200/healthz` returns 200
+- Dependencies: `python scripts/yt_extract.py --check-deps` (exits 0 if yt-dlp + node on PATH)
+- YT extraction: Output `.md` at `data/yt_extracts/<title> [<id>].md` with Title/Channel/Duration/Transcript sections
+- RSSHub healthz: `curl -s http://localhost:1200/healthz` returns 200
+- RSSHub route check after `docker compose up rsshub`:
+  ```bash
+  for r in /reddit/subreddit/netsec /hackernews/best /github/trending/daily; do
+    curl -s -o /dev/null -w "%{http_code} $r\n" "http://localhost:1200$r"
+  done
+  ```
 - API (Phase 3+): `curl http://localhost:8000/health`
 
 ## Conventions

@@ -1,36 +1,44 @@
+# Routes follow RSSHub's documented patterns. Verified against
+# https://docs.rsshub.app/ and quarry/app.jsx route definitions.
+# After first `docker compose up rsshub`, validate each route with:
+#   curl -s -o /dev/null -w "%{http_code} %{url}\n" "$RSSHUB_URL<route>"
+# 200 = working, 404 = route invalid for current RSSHub version.
+
 rsshub:
-  instance: "http://rsshub:1200"  # Docker service name
+  # localhost default for running collector outside Docker.
+  # Inside Docker, override with env: RSSHUB_URL=http://rsshub:1200
+  instance: "http://localhost:1200"
   interval_minutes: 15
   feeds:
-    # -- Security / Bug Bounty --
-    - route: "/reddit/subreddit/netsec/hot"
+    # -- Security / Bug Bounty (reddit default sort = hot) --
+    - route: "/reddit/subreddit/netsec"
       category: bugbounty
       name: "r/netsec"
-    - route: "/reddit/subreddit/bugbounty/hot"
+    - route: "/reddit/subreddit/bugbounty"
       category: bugbounty
       name: "r/bugbounty"
-    - route: "/reddit/subreddit/websecurityresearch/hot"
+    - route: "/reddit/subreddit/websecurityresearch"
       category: bugbounty
       name: "r/websecurityresearch"
 
     # -- AI / ML --
-    - route: "/reddit/subreddit/machinelearning/hot"
+    - route: "/reddit/subreddit/MachineLearning"
       category: ai-money
-      name: "r/machinelearning"
-    - route: "/reddit/subreddit/LocalLLaMA/hot"
+      name: "r/MachineLearning"
+    - route: "/reddit/subreddit/LocalLLaMA"
       category: ai-money
       name: "r/LocalLLaMA"
 
     # -- SaaS / Indie --
-    - route: "/reddit/subreddit/SideProject/hot"
+    - route: "/reddit/subreddit/SideProject"
       category: saas-niches
       name: "r/SideProject"
-    - route: "/reddit/subreddit/SaaS/hot"
+    - route: "/reddit/subreddit/SaaS"
       category: saas-niches
       name: "r/SaaS"
 
     # -- Crypto --
-    - route: "/reddit/subreddit/defi/hot"
+    - route: "/reddit/subreddit/defi"
       category: crypto-defi
       name: "r/defi"
 
@@ -42,16 +50,15 @@ rsshub:
       category: tools-drops
       name: "HN Show"
 
-    # -- GitHub --
+    # -- GitHub trending: /github/trending/:since/:lang?/:spoken_lang? --
     - route: "/github/trending/daily"
       category: tools-drops
-      name: "GitHub Trending"
+      name: "GitHub Trending (daily)"
 
 youtube:
   interval_minutes: 360
   cookies_path: "cookies/cookies.txt"
-  # Use handles WITHOUT '@' prefix — RSSHub/yt-dlp normalize either form,
-  # but consistent input avoids subtle routing bugs across collectors.
+  # Use handles WITHOUT '@' prefix; collector adds it where needed.
   channels:
     - handle: "LiveOverflow"
       category: bugbounty

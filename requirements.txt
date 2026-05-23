@@ -3,7 +3,7 @@ pydantic>=2.0
 pyyaml>=6.0
 
 # Collection
-yt-dlp>=2024.0
+yt-dlp>=2026.03.17  # --js-runtimes flag added in this release
 feedparser>=6.0
 httpx>=0.27
 
