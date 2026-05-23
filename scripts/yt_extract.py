@@ -196,7 +196,7 @@ def format_duration(seconds: int) -> str:
 def main():
     parser = argparse.ArgumentParser(description="Extract YouTube video content to markdown")
     parser.add_argument("url", help="YouTube video URL")
-    parser.add_argument("--cookies", default=None, help="Path to cookies.txt for authenticated access")
+    parser.add_argument("--cookies", default="cookies/cookies.txt", help="Path to cookies.txt for authenticated access")
     parser.add_argument("--output-dir", default="data/yt_extracts", help="Output directory")
     args = parser.parse_args()
 

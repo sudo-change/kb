@@ -1,0 +1,35 @@
+categories:
+  - id: bugbounty
+    name: "BugBounty"
+    description: "Vulnerabilities, techniques, CTFs, writeups, bug bounty programs"
+    keywords: ["bug bounty", "vulnerability", "exploit", "ctf", "xss", "ssrf", "idor", "rce", "sqli", "pentest", "writeup", "hackerone", "bugcrowd"]
+
+  - id: ai-money
+    name: "AI-Money"
+    description: "Dev-related money making with AI, automation income, money glitches"
+    keywords: ["make money", "income", "revenue", "side project", "freelance", "automation", "passive income", "ai tool", "monetize"]
+
+  - id: saas-niches
+    name: "SaaS-Niches"
+    description: "SaaS ideas, market gaps, niche opportunities to provide value"
+    keywords: ["saas", "micro-saas", "niche", "market gap", "indie hacker", "arr", "mrr", "bootstrapped", "startup idea"]
+
+  - id: crypto-defi
+    name: "Crypto/DeFi-Alpha"
+    description: "DeFi exploits, MEV, yield opportunities, smart contract bugs"
+    keywords: ["defi", "mev", "yield", "smart contract", "solidity", "exploit", "flash loan", "arbitrage", "airdrop", "token"]
+
+  - id: attacking-ai
+    name: "Attacking-AI"
+    description: "Adversarial ML, LLM jailbreaks, AI security research"
+    keywords: ["jailbreak", "prompt injection", "adversarial", "llm security", "ai safety", "red team", "model extraction"]
+
+  - id: tools-drops
+    name: "Tools-Drops"
+    description: "New tools, trending repos, developer tooling releases"
+    keywords: ["new tool", "release", "open source", "trending", "framework", "library", "cli tool", "developer tool"]
+
+  - id: general
+    name: "General"
+    description: "High-signal items that don't fit other categories"
+    keywords: []

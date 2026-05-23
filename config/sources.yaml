@@ -1,0 +1,101 @@
+rsshub:
+  instance: "http://rsshub:1200"  # Docker service name
+  interval_minutes: 15
+  feeds:
+    # -- Security / Bug Bounty --
+    - route: "/reddit/subreddit/netsec/hot"
+      category: bugbounty
+      name: "r/netsec"
+    - route: "/reddit/subreddit/bugbounty/hot"
+      category: bugbounty
+      name: "r/bugbounty"
+    - route: "/reddit/subreddit/websecurityresearch/hot"
+      category: bugbounty
+      name: "r/websecurityresearch"
+
+    # -- AI / ML --
+    - route: "/reddit/subreddit/machinelearning/hot"
+      category: ai-money
+      name: "r/machinelearning"
+    - route: "/reddit/subreddit/LocalLLaMA/hot"
+      category: ai-money
+      name: "r/LocalLLaMA"
+
+    # -- SaaS / Indie --
+    - route: "/reddit/subreddit/SideProject/hot"
+      category: saas-niches
+      name: "r/SideProject"
+    - route: "/reddit/subreddit/SaaS/hot"
+      category: saas-niches
+      name: "r/SaaS"
+
+    # -- Crypto --
+    - route: "/reddit/subreddit/defi/hot"
+      category: crypto-defi
+      name: "r/defi"
+
+    # -- HackerNews --
+    - route: "/hackernews/best"
+      category: general
+      name: "HN Best"
+    - route: "/hackernews/show"
+      category: tools-drops
+      name: "HN Show"
+
+    # -- GitHub --
+    - route: "/github/trending/daily"
+      category: tools-drops
+      name: "GitHub Trending"
+
+youtube:
+  interval_minutes: 360
+  cookies_path: "cookies/cookies.txt"
+  channels:
+    - id: "@LiveOverflow"
+      category: bugbounty
+    - id: "@JohnHammond"
+      category: bugbounty
+    - id: "@IppSec"
+      category: bugbounty
+    - id: "@NetworkChuck"
+      category: general
+    - id: "@ThePrimeagen"
+      category: tools-drops
+    - id: "@firaborealysis"  # Critical Thinking Bug Bounty Podcast
+      category: bugbounty
+
+rss:
+  interval_minutes: 120
+  feeds:
+    - url: "https://portswigger.net/research/rss"
+      category: bugbounty
+      name: "PortSwigger Research"
+    - url: "https://blog.trailofbits.com/feed"
+      category: bugbounty
+      name: "Trail of Bits"
+    - url: "https://googleprojectzero.blogspot.com/feeds/posts/default"
+      category: bugbounty
+      name: "Google Project Zero"
+    - url: "https://blog.assetnote.io/feed.xml"
+      category: bugbounty
+      name: "Assetnote Research"
+    - url: "https://blog.orange.tw/atom.xml"
+      category: bugbounty
+      name: "Orange Tsai"
+    - url: "https://simonwillison.net/atom/everything/"
+      category: ai-money
+      name: "Simon Willison"
+
+telegram:
+  interval_minutes: 15
+  delivery:
+    chat_id: null        # Set after creating group
+    topics:
+      bugbounty: null    # Topic IDs set after creation
+      ai-money: null
+      saas-niches: null
+      crypto-defi: null
+      attacking-ai: null
+      tools-drops: null
+      general: null
+      status: null

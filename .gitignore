@@ -2,11 +2,14 @@ nul
 # Secrets
 Cookie.txt
 cookies/*.txt
+cookies/*.json
+*.session
 .env
 
 # Data
 data/*.db
 data/*.sqlite
+data/yt_extracts/
 
 # Python
 __pycache__/
