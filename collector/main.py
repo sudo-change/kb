@@ -167,6 +167,32 @@ def run_once(db: DB) -> int:
                 log.error(msg)
                 errors.append(msg)
 
+    # Telegram channel ingestion (Telethon MTProto)
+    tg_cfg = sources_cfg.get("telegram", {}).get("ingestion", {})
+    tg_channels = tg_cfg.get("channels", [])
+    api_id = os.environ.get("TELEGRAM_API_ID", "")
+    api_hash = os.environ.get("TELEGRAM_API_HASH", "")
+    if tg_channels and api_id and api_hash:
+        try:
+            from collectors.telegram_channel import TelegramChannelCollector
+            channel_refs = [ch.get("name", "") for ch in tg_channels if ch.get("name")]
+            collector = TelegramChannelCollector(
+                api_id=int(api_id),
+                api_hash=api_hash,
+                phone="",
+                channels=channel_refs,
+                category=None,
+            )
+            if collector.validate_config():
+                items = _auto_classify(collector.collect())
+                added = db.store_items(items)
+                total_added += added
+                log.info("[telegram] stored %d/%d items", added, len(items))
+        except Exception as e:
+            msg = f"telegram: {e}"
+            log.error(msg)
+            errors.append(msg)
+
     db.log_run({"started_at": started, "items_added": total_added, "errors": errors})
     log.info("Collection run done — added %d items, %d errors", total_added, len(errors))
     return total_added

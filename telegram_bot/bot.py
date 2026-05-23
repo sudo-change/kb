@@ -23,14 +23,38 @@ MAX_RETRIES = 3
 RETRY_DELAY = 5  # seconds
 
 
+_LABEL_TO_ID = {
+    "bugbounty": "bugbounty",
+    "ai-money": "ai-money",
+    "saas-niches": "saas-niches",
+    "crypto-defi": "crypto-defi",
+    "crypto-defi-alpha": "crypto-defi",
+    "crypto/defi-alpha": "crypto-defi",
+    "attacking-ai": "attacking-ai",
+    "tools-drops": "tools-drops",
+    "general": "general",
+    "status": "status",
+}
+
+
 def _topic_ids() -> dict[str, int]:
-    """Load topic IDs from TELEGRAM_TOPIC_IDS env var (JSON map)."""
+    """Load topic IDs from TELEGRAM_TOPIC_IDS env var (JSON map).
+
+    Normalizes keys to lowercase category IDs from categories.yaml.
+    Accepts keys like "BugBounty", "Crypto-DeFi-Alpha", "crypto-defi", etc.
+    """
     raw = os.getenv("TELEGRAM_TOPIC_IDS", "{}")
     try:
-        return json.loads(raw)
+        parsed = json.loads(raw)
     except json.JSONDecodeError:
         log.warning("TELEGRAM_TOPIC_IDS is not valid JSON")
         return {}
+
+    result: dict[str, int] = {}
+    for key, val in parsed.items():
+        normalized = _LABEL_TO_ID.get(key.lower(), key.lower())
+        result[normalized] = val
+    return result
 
 
 def _fetch_items_for_category(category: str, run_date: date) -> list[dict[str, Any]]:
@@ -124,6 +148,6 @@ def send_digest(run_date: date | None = None) -> None:
         errors.append(f"Health fetch failed: {exc}")
 
     status_text = format_status(health, per_source, errors)
-    status_thread = topic_ids.get("Status")
+    status_thread = topic_ids.get("status")
     _send_message_with_retry(bot, chat_id, status_text, status_thread)
     log.info("Digest complete. Sources: %d, Errors: %d", len(per_source), len(errors))

@@ -10,7 +10,7 @@ rsshub:
   instance: "http://localhost:1200"
   interval_minutes: 15
   feeds:
-    # -- Security / Bug Bounty (reddit default sort = hot) --
+    # ── Security / Bug Bounty ──
     - route: "/reddit/subreddit/netsec"
       category: bugbounty
       name: "r/netsec"
@@ -20,29 +20,63 @@ rsshub:
     - route: "/reddit/subreddit/websecurityresearch"
       category: bugbounty
       name: "r/websecurityresearch"
+    - route: "/reddit/subreddit/ReverseEngineering"
+      category: bugbounty
+      name: "r/ReverseEngineering"
+    - route: "/reddit/subreddit/Malware"
+      category: bugbounty
+      name: "r/Malware"
 
-    # -- AI / ML --
+    # ── AI / ML ──
     - route: "/reddit/subreddit/MachineLearning"
       category: ai-money
       name: "r/MachineLearning"
     - route: "/reddit/subreddit/LocalLLaMA"
       category: ai-money
       name: "r/LocalLLaMA"
+    - route: "/reddit/subreddit/artificial"
+      category: ai-money
+      name: "r/artificial"
 
-    # -- SaaS / Indie --
+    # ── Attacking AI ──
+    - route: "/reddit/subreddit/PromptInjection"
+      category: attacking-ai
+      name: "r/PromptInjection"
+
+    # ── SaaS / Indie ──
     - route: "/reddit/subreddit/SideProject"
       category: saas-niches
       name: "r/SideProject"
     - route: "/reddit/subreddit/SaaS"
       category: saas-niches
       name: "r/SaaS"
+    - route: "/reddit/subreddit/Entrepreneur"
+      category: saas-niches
+      name: "r/Entrepreneur"
+    - route: "/reddit/subreddit/microsaas"
+      category: saas-niches
+      name: "r/microsaas"
 
-    # -- Crypto --
+    # ── Crypto / DeFi ──
     - route: "/reddit/subreddit/defi"
       category: crypto-defi
       name: "r/defi"
+    - route: "/reddit/subreddit/ethdev"
+      category: crypto-defi
+      name: "r/ethdev"
 
-    # -- HackerNews --
+    # ── Tools / Dev ──
+    - route: "/reddit/subreddit/commandline"
+      category: tools-drops
+      name: "r/commandline"
+    - route: "/reddit/subreddit/programming"
+      category: tools-drops
+      name: "r/programming"
+    - route: "/reddit/subreddit/selfhosted"
+      category: tools-drops
+      name: "r/selfhosted"
+
+    # ── HackerNews ──
     - route: "/hackernews/best"
       category: general
       name: "HN Best"
@@ -50,10 +84,37 @@ rsshub:
       category: tools-drops
       name: "HN Show"
 
-    # -- GitHub trending: /github/trending/:since/:lang?/:spoken_lang? --
+    # ── GitHub trending ──
     - route: "/github/trending/daily"
       category: tools-drops
       name: "GitHub Trending (daily)"
+    - route: "/github/trending/daily/python"
+      category: tools-drops
+      name: "GitHub Trending Python"
+    - route: "/github/trending/daily/go"
+      category: tools-drops
+      name: "GitHub Trending Go"
+    - route: "/github/trending/daily/rust"
+      category: tools-drops
+      name: "GitHub Trending Rust"
+
+    # ── arXiv (AI security + ML) ──
+    - route: "/arxiv/search_query/cat:cs.CR+AND+LLM/relevance/1"
+      category: attacking-ai
+      name: "arXiv CS.CR + LLM"
+    - route: "/arxiv/search_query/cat:cs.AI/relevance/1"
+      category: ai-money
+      name: "arXiv CS.AI"
+
+    # ── ProductHunt ──
+    - route: "/producthunt/today"
+      category: saas-niches
+      name: "ProductHunt Today"
+
+    # ── Lobsters ──
+    - route: "/lobste.rs"
+      category: general
+      name: "Lobsters"
 
 youtube:
   interval_minutes: 360
@@ -76,6 +137,7 @@ youtube:
 rss:
   interval_minutes: 120
   feeds:
+    # ── Bug Bounty / Security blogs ──
     - url: "https://portswigger.net/research/rss"
       category: bugbounty
       name: "PortSwigger Research"
@@ -91,20 +153,90 @@ rss:
     - url: "https://blog.orange.tw/atom.xml"
       category: bugbounty
       name: "Orange Tsai"
+    - url: "https://blog.zsec.uk/rss/"
+      category: bugbounty
+      name: "zsec.uk"
+    - url: "https://bugs.xdavidhu.me/feed.xml"
+      category: bugbounty
+      name: "xdavidhu bugs"
+
+    # ── AI / Dev money ──
     - url: "https://simonwillison.net/atom/everything/"
       category: ai-money
       name: "Simon Willison"
 
+    # ── Tools / General dev blogs ──
+    - url: "https://crawshaw.io/blog/feed.xml"
+      category: tools-drops
+      name: "crawshaw.io"
+    - url: "https://joshblais.com/index.xml"
+      category: tools-drops
+      name: "Josh Blais"
+    - url: "https://ma.ttias.be/blog/feed/"
+      category: tools-drops
+      name: "Mattias Geniar"
+    - url: "https://martinfowler.com/feed.atom"
+      category: tools-drops
+      name: "Martin Fowler"
+    - url: "https://freek.dev/feed"
+      category: tools-drops
+      name: "Freek Van der Herten"
+    - url: "https://calebporzio.com/feed"
+      category: tools-drops
+      name: "Caleb Porzio"
+    - url: "https://christoph-rumpel.com/feed"
+      category: tools-drops
+      name: "Christoph Rumpel"
+
+    # ── Aggregators / newsletters ──
+    - url: "https://www.pointer.io/archives/feed"
+      category: general
+      name: "Pointer.io"
+    - url: "https://serializer.io/feed.xml"
+      category: general
+      name: "Serializer"
+    - url: "https://geek.nu/rss.xml"
+      category: general
+      name: "geek.nu"
+
+    # ── Crypto / DeFi ──
+    - url: "https://rekt.news/feed.xml"
+      category: crypto-defi
+      name: "Rekt.news"
+
+    # ── SaaS / Indie ──
+    - url: "https://www.indiehackers.com/feed"
+      category: saas-niches
+      name: "IndieHackers"
+
+    # ── Podcasts (RSS feeds) ──
+    - url: "https://feeds.transistor.fm/mostly-technical"
+      category: tools-drops
+      name: "Mostly Technical Podcast"
+
 telegram:
   interval_minutes: 15
   delivery:
-    chat_id: null        # Set after creating group
-    topics:
-      bugbounty: null    # Topic IDs set after creation
-      ai-money: null
-      saas-niches: null
-      crypto-defi: null
-      attacking-ai: null
-      tools-drops: null
-      general: null
-      status: null
+    # Reads from env: TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_TOPIC_IDS
+    # Topic IDs loaded from TELEGRAM_TOPIC_IDS env var as JSON:
+    #   {"bugbounty":2,"ai-money":3,"saas-niches":4,...,"status":9}
+    bot_token_env: "TELEGRAM_BOT_TOKEN"
+    chat_id_env: "TELEGRAM_CHAT_ID"
+    topic_ids_env: "TELEGRAM_TOPIC_IDS"
+  ingestion:
+    # Telegram channel ingestion via Telethon (MTProto)
+    # Requires: TELEGRAM_API_ID, TELEGRAM_API_HASH env vars
+    api_id_env: "TELEGRAM_API_ID"
+    api_hash_env: "TELEGRAM_API_HASH"
+    channels:
+      # Security channels
+      - name: "@bugbountywriteup"
+        category: bugbounty
+      - name: "@offensive_security"
+        category: bugbounty
+      # AI channels
+      - name: "@dailydoseofds"
+        category: ai-money
+      # General tech
+      - name: "@techmeme"
+        category: general
