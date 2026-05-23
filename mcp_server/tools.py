@@ -125,19 +125,38 @@ def tool_get_youtube_transcript(url: str) -> str:
     )
 
 
-def tool_get_daily_digest(api_base: str = API_BASE_DEFAULT) -> dict[str, list[dict]]:
+_DIGEST_FIELDS = ("id", "title", "url", "source_type", "published_at")
+
+
+def _compact_item(item: dict) -> dict:
+    return {k: item[k] for k in _DIGEST_FIELDS if k in item}
+
+
+def tool_get_daily_digest(
+    per_category: int = 15,
+    api_base: str = API_BASE_DEFAULT,
+) -> dict[str, dict]:
     today = datetime.now(timezone.utc).replace(
         hour=0, minute=0, second=0, microsecond=0
     ).isoformat()
 
     items: list[dict] = api_get("/items", {"since": today, "limit": 500}, api_base)  # type: ignore[assignment]
 
-    digest: dict[str, list[dict]] = {CATEGORY_LABELS.get(c, c): [] for c in CATEGORIES}
-    digest["Uncategorized"] = []
+    buckets: dict[str, list[dict]] = {CATEGORY_LABELS.get(c, c): [] for c in CATEGORIES}
+    buckets["Uncategorized"] = []
 
     for item in items:
         raw = item.get("category")
         label = CATEGORY_LABELS.get(raw, raw) if raw else "Uncategorized"
-        digest.setdefault(label, []).append(item)
+        buckets.setdefault(label, []).append(item)
 
-    return {cat: rows for cat, rows in digest.items() if rows}
+    digest: dict[str, dict] = {}
+    for cat, rows in buckets.items():
+        if not rows:
+            continue
+        digest[cat] = {
+            "count": len(rows),
+            "items": [_compact_item(r) for r in rows[:per_category]],
+        }
+
+    return digest
