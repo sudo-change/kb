@@ -97,7 +97,7 @@ def run_once(db: DB) -> int:
     # HackerNews (Algolia API)
     try:
         from collectors.hackernews import HackerNewsCollector
-        collector = HackerNewsCollector(category="general")
+        collector = HackerNewsCollector(category=None)
         if collector.validate_config():
             items = _auto_classify(collector.collect())
             added = db.store_items(items)
