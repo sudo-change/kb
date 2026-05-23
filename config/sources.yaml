@@ -62,7 +62,7 @@ youtube:
   channels:
     - handle: "LiveOverflow"
       category: bugbounty
-    - handle: "JohnHammond"
+    - handle: "_JohnHammond"
       category: bugbounty
     - handle: "IppSec"
       category: bugbounty
@@ -70,7 +70,7 @@ youtube:
       category: general
     - handle: "ThePrimeagen"
       category: tools-drops
-    - handle: "CriticalThinkingBugBountyPodcast"
+    - handle: "criticalthinkingpodcast"
       category: bugbounty
 
 rss:

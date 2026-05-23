@@ -75,6 +75,8 @@ def run_once(db: DB) -> int:
                 added = db.store_items(items)
                 total_added += added
                 log.info("[rss] stored %d/%d items", added, len(items))
+                if collector.errors:
+                    errors.extend(collector.errors)
         except Exception as e:
             msg = f"rss: {e}"
             log.error(msg)

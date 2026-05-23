@@ -66,17 +66,15 @@ class YouTubeCollector(BaseCollector):
     def _collect_channel(self, channel: str, since: datetime | None) -> list[Item]:
         import feedparser
 
-        # Handle @handle format — resolve via search if needed
-        # YouTube provides RSS for channel IDs directly
         if channel.startswith("UC") and len(channel) == 24:
-            # channel_id format — direct RSS works
             feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel}"
         else:
-            # @handle format — modern channels need channel_id for RSS
-            # Use yt-dlp to resolve: yt-dlp --print channel_id "https://www.youtube.com/@handle"
-            # then update sources.yaml with the UC... ID
             handle = channel.lstrip("@")
-            feed_url = f"https://www.youtube.com/feeds/videos.xml?user={handle}"
+            channel_id = self._resolve_handle(handle)
+            if channel_id:
+                feed_url = f"https://www.youtube.com/feeds/videos.xml?channel_id={channel_id}"
+            else:
+                feed_url = f"https://www.youtube.com/feeds/videos.xml?user={handle}"
 
         feed = feedparser.parse(feed_url)
         items = []
@@ -137,6 +135,26 @@ class YouTubeCollector(BaseCollector):
                 "thumbnail": meta.get("thumbnail_url", ""),
             },
         )
+
+    def _resolve_handle(self, handle: str) -> str | None:
+        """Resolve @handle to UC... channel_id via YouTube page scrape."""
+        import re as _re
+        try:
+            resp = httpx.get(
+                f"https://www.youtube.com/@{handle}",
+                headers={"User-Agent": "Mozilla/5.0"},
+                timeout=10,
+                follow_redirects=True,
+            )
+            m = _re.search(r'"channelId"\s*:\s*"(UC[a-zA-Z0-9_-]{22})"', resp.text)
+            if m:
+                return m.group(1)
+            m = _re.search(r'"externalId"\s*:\s*"(UC[a-zA-Z0-9_-]{22})"', resp.text)
+            if m:
+                return m.group(1)
+        except Exception:
+            pass
+        return None
 
     def _get_transcript(self, video_id: str) -> str:
         if YouTubeTranscriptApi is None:

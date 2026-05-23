@@ -22,6 +22,7 @@ class RSSCollector(BaseCollector):
         self._feeds = feeds
         self._per_feed_since: dict[str, datetime] = per_feed_since or {}
         self.per_feed_last: dict[str, datetime] = {}
+        self.errors: list[str] = []
 
     def validate_config(self) -> bool:
         if feedparser is None:
@@ -35,6 +36,7 @@ class RSSCollector(BaseCollector):
     def collect(self, since: datetime | None = None) -> list[Item]:
         items = []
         self.per_feed_last = {}
+        self.errors = []
 
         for feed_cfg in self._feeds:
             url = feed_cfg.get("url", "")
@@ -54,7 +56,9 @@ class RSSCollector(BaseCollector):
                 elif feed_since:
                     self.per_feed_last[url] = feed_since
             except Exception as e:
+                msg = f"rss:{feed_name or url}: {e}"
                 print(f"  [rss] Error fetching {url}: {e}")
+                self.errors.append(msg)
                 if url in self._per_feed_since:
                     self.per_feed_last[url] = self._per_feed_since[url]
 
@@ -65,8 +69,7 @@ class RSSCollector(BaseCollector):
     ) -> tuple[list[Item], datetime | None]:
         feed = feedparser.parse(url)
         if feed.bozo and not feed.entries:
-            print(f"  [rss] Feed error for {url}: {feed.bozo_exception}")
-            return [], None
+            raise RuntimeError(str(feed.bozo_exception))
 
         result = []
         max_pub: datetime | None = None
