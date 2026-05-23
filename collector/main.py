@@ -26,7 +26,7 @@ logging.basicConfig(
 log = logging.getLogger("kf.collector")
 
 DB_PATH = os.environ.get("KF_DB_PATH", "data/kf.db")
-RSSHUB_URL = os.environ.get("RSSHUB_URL", "http://localhost:1200")
+RSSHUB_URL = os.environ.get("RSSHUB_URL", "")
 COOKIES_PATH = os.environ.get("KF_COOKIES", "cookies/cookies.txt")
 
 
@@ -36,7 +36,7 @@ def _build_rss_items(sources_cfg: dict) -> list[dict]:
 
     # RSSHub feeds → prepend instance URL
     rsshub = sources_cfg.get("rsshub", {})
-    instance = rsshub.get("instance", RSSHUB_URL).rstrip("/")
+    instance = (RSSHUB_URL or rsshub.get("instance", "http://localhost:1200")).rstrip("/")
     for feed in rsshub.get("feeds", []):
         route = feed.get("route", "")
         feeds.append({
@@ -211,13 +211,19 @@ def main():
         return
 
     # Daemon mode — APScheduler
+    asyncio.run(_run_daemon(db))
+
+
+async def _run_daemon(db):
+    """Run the collector scheduler inside a proper asyncio event loop."""
     scheduler = CollectionScheduler(db=db, collect_fn=lambda: run_once(db))
     scheduler.start()
     log.info("Collector running. Ctrl+C to stop.")
 
     try:
-        asyncio.get_event_loop().run_forever()
-    except (KeyboardInterrupt, SystemExit):
+        while True:
+            await asyncio.sleep(3600)
+    except (KeyboardInterrupt, SystemExit, asyncio.CancelledError):
         scheduler.stop()
         log.info("Collector stopped.")
 
