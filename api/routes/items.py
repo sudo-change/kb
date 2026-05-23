@@ -8,9 +8,21 @@ from api.deps import get_db
 router = APIRouter()
 
 VALID_CATEGORIES = [
-    "BugBounty", "AI-Money", "SaaS-Niches",
-    "Crypto-DeFi-Alpha", "Attacking-AI", "Tools-Drops", "General",
+    "bugbounty", "ai-money", "saas-niches",
+    "crypto-defi", "attacking-ai", "tools-drops", "general",
 ]
+
+_DISPLAY_TO_ID = {
+    "bugbounty": "bugbounty",
+    "ai-money": "ai-money",
+    "saas-niches": "saas-niches",
+    "crypto-defi": "crypto-defi",
+    "crypto-defi-alpha": "crypto-defi",
+    "crypto/defi-alpha": "crypto-defi",
+    "attacking-ai": "attacking-ai",
+    "tools-drops": "tools-drops",
+    "general": "general",
+}
 
 
 class ItemUpdate(BaseModel):
@@ -31,11 +43,13 @@ def list_items(
     offset: int = 0,
     db=Depends(get_db),
 ):
-    if category and category not in VALID_CATEGORIES:
-        raise HTTPException(
-            status_code=400,
-            detail={"error": "invalid category", "valid": VALID_CATEGORIES},
-        )
+    if category:
+        category = _DISPLAY_TO_ID.get(category.lower(), category.lower())
+        if category not in VALID_CATEGORIES:
+            raise HTTPException(
+                status_code=400,
+                detail={"error": "invalid category", "valid": VALID_CATEGORIES},
+            )
     return db.get_items({
         "category": category,
         "source_id": source,
